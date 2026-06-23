@@ -83,7 +83,24 @@ const SKILLS = [
   { category: "Tools & AI", items: ["Git", "GitHub", "Claude AI", "ChatGPT", "Llama", "GLM", "Deepseek", "QWEN"] },
 ];
 
-function NavBar({ active, onNav }) {
+function useViewport() {
+  const getWidth = () => (typeof window === "undefined" ? 1200 : window.innerWidth);
+  const [width, setWidth] = useState(getWidth);
+
+  useEffect(() => {
+    const onResize = () => setWidth(getWidth());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return {
+    width,
+    isMobile: width <= 640,
+    isTablet: width <= 900,
+  };
+}
+
+function NavBar({ active, onNav, isMobile }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -97,17 +114,31 @@ function NavBar({ active, onNav }) {
       backdropFilter: scrolled ? "blur(12px)" : "none",
       borderBottom: scrolled ? "1px solid rgba(34,211,238,0.12)" : "none",
       transition: "all 0.3s ease",
-      padding: "0 clamp(1.5rem,5vw,4rem)",
+      padding: isMobile ? "0.25rem clamp(0.75rem,4vw,1rem)" : "0 clamp(1.5rem,5vw,4rem)",
     }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#22d3ee", fontSize: 18, fontWeight: 700, letterSpacing: "-0.5px" }}>
+      <div style={{
+        maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: isMobile ? "stretch" : "center",
+        justifyContent: "space-between", minHeight: isMobile ? 82 : 64, flexDirection: isMobile ? "column" : "row",
+        paddingTop: isMobile ? 6 : 0, paddingBottom: isMobile ? 6 : 0,
+      }}>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace", color: "#22d3ee", fontSize: isMobile ? 16 : 18,
+          fontWeight: 700, letterSpacing: "-0.5px", lineHeight: isMobile ? "24px" : "normal",
+        }}>
           <span style={{ color: "#64748b" }}>&lt;</span>ZTB<span style={{ color: "#64748b" }}>/&gt;</span>
         </span>
-        <div style={{ display: "flex", gap: "2rem" }}>
+        <div style={{
+          display: "flex",
+          gap: isMobile ? "0.9rem" : "2rem",
+          overflowX: isMobile ? "auto" : "visible",
+          whiteSpace: isMobile ? "nowrap" : "normal",
+          paddingBottom: isMobile ? 2 : 0,
+          scrollbarWidth: "thin",
+        }}>
           {NAV_LINKS.map(link => (
             <button key={link} onClick={() => onNav(link)} style={{
               background: "none", border: "none", cursor: "pointer",
-              fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 500,
+              fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 13 : 14, fontWeight: 500,
               color: active === link ? "#22d3ee" : "#94a3b8",
               transition: "color 0.2s",
               padding: "4px 0",
@@ -120,27 +151,28 @@ function NavBar({ active, onNav }) {
   );
 }
 
-function HeroSection({ onNav }) {
+function HeroSection({ onNav, isMobile, isTablet }) {
   return (
     <section id="hero" style={{
-      minHeight: "100vh", display: "flex", alignItems: "center",
-      padding: "0 clamp(1.5rem,5vw,4rem)",
+      minHeight: isTablet ? "auto" : "100vh", display: "flex", alignItems: "center",
+      padding: isMobile ? "6.5rem clamp(1rem,4.5vw,1.25rem) 3.5rem" : "0 clamp(1.5rem,5vw,4rem)",
       background: "linear-gradient(135deg, #080c18 0%, #0d1529 60%, #0a1628 100%)",
       position: "relative", overflow: "hidden",
+      scrollMarginTop: isMobile ? 92 : 70,
     }}>
       <div style={{
         position: "absolute", top: "20%", right: "5%",
-        width: 420, height: 420, borderRadius: "50%",
+        width: isMobile ? 260 : 420, height: isMobile ? 260 : 420, borderRadius: "50%",
         background: "radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
       <div style={{
         position: "absolute", bottom: "10%", left: "2%",
-        width: 300, height: 300, borderRadius: "50%",
+        width: isMobile ? 180 : 300, height: isMobile ? 180 : 300, borderRadius: "50%",
         background: "radial-gradient(circle, rgba(167,139,250,0.05) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
-      <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", gap: "4rem", width: "100%", flexWrap: "wrap" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", gap: isMobile ? "2rem" : "4rem", width: "100%", flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 280 }}>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", color: "#22d3ee", fontSize: 14, marginBottom: "1rem", letterSpacing: 1 }}>
             {"// hello world"}
@@ -155,22 +187,22 @@ function HeroSection({ onNav }) {
           <p style={{ fontFamily: "'Inter', sans-serif", color: "#94a3b8", fontSize: 16, lineHeight: 1.75, maxWidth: 520, marginBottom: "2rem" }}>
             Computer Science graduate from Laguna State Polytechnic University — Los Baños. I build cross-platform mobile apps, web systems, and machine learning solutions that solve real-world problems.
           </p>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <button onClick={() => onNav("Projects")} style={{
               background: "#22d3ee", color: "#080c18", border: "none", borderRadius: 8,
-              padding: "12px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer",
+              padding: isMobile ? "11px 18px" : "12px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer",
               fontFamily: "'Inter', sans-serif", transition: "opacity 0.2s",
             }}>View Projects</button>
             <button onClick={() => onNav("Contact")} style={{
               background: "transparent", color: "#22d3ee", border: "1.5px solid rgba(34,211,238,0.4)",
-              borderRadius: 8, padding: "12px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer",
+              borderRadius: 8, padding: isMobile ? "11px 18px" : "12px 28px", fontSize: 15, fontWeight: 600, cursor: "pointer",
               fontFamily: "'Inter', sans-serif", transition: "all 0.2s",
             }}>Get In Touch</button>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
           <div style={{
-            width: 200, height: 200, borderRadius: "50%",
+            width: isMobile ? 168 : 200, height: isMobile ? 168 : 200, borderRadius: "50%",
             border: "3px solid rgba(34,211,238,0.35)",
             overflow: "hidden", position: "relative",
             boxShadow: "0 0 40px rgba(34,211,238,0.12)",
@@ -193,9 +225,9 @@ function HeroSection({ onNav }) {
   );
 }
 
-function AboutSection() {
+function AboutSection({ isMobile }) {
   return (
-    <section id="about" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#080c18" }}>
+    <section id="about" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#080c18", scrollMarginTop: isMobile ? 96 : 72 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <SectionLabel label="01 — About Me" />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "3rem", alignItems: "start" }}>
@@ -232,7 +264,7 @@ function AboutSection() {
   );
 }
 
-function ProjectsSection() {
+function ProjectsSection({ isMobile }) {
   const [hovered, setHovered] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -261,13 +293,13 @@ function ProjectsSection() {
   }, [selectedProject]);
 
   return (
-    <section id="projects" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#060a14" }}>
+    <section id="projects" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#060a14", scrollMarginTop: isMobile ? 96 : 72 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <SectionLabel label="02 — Projects" />
         <h2 style={{ fontFamily: "'Inter', sans-serif", color: "#f1f5f9", fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, margin: "0 0 3rem" }}>
           Things I've built
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fit, minmax(${isMobile ? "240px" : "300px"}, 1fr))`, gap: "1.5rem" }}>
           {PROJECTS.map(project => (
             <div
               key={project.id}
@@ -442,9 +474,9 @@ function ProjectsSection() {
   );
 }
 
-function SkillsSection() {
+function SkillsSection({ isMobile }) {
   return (
-    <section id="skills" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#080c18" }}>
+    <section id="skills" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#080c18", scrollMarginTop: isMobile ? 96 : 72 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         <SectionLabel label="03 — Skills" />
         <h2 style={{ fontFamily: "'Inter', sans-serif", color: "#f1f5f9", fontSize: "clamp(1.6rem,3vw,2.2rem)", fontWeight: 700, margin: "0 0 3rem" }}>
@@ -477,9 +509,9 @@ function SkillsSection() {
   );
 }
 
-function ContactSection() {
+function ContactSection({ isMobile }) {
   return (
-    <section id="contact" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#060a14" }}>
+    <section id="contact" style={{ padding: "6rem clamp(1.5rem,5vw,4rem)", background: "#060a14", scrollMarginTop: isMobile ? 96 : 72 }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", textAlign: "center" }}>
         <SectionLabel label="04 — Contact" centered />
         <h2 style={{ fontFamily: "'Inter', sans-serif", color: "#f1f5f9", fontSize: "clamp(1.8rem,3vw,2.8rem)", fontWeight: 700, margin: "0 0 1rem" }}>
@@ -492,7 +524,7 @@ function ContactSection() {
           <a href="mailto:bathanzhyheim@gmail.com" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             background: "#22d3ee", color: "#080c18", borderRadius: 8,
-            padding: "13px 32px", fontSize: 15, fontWeight: 700, textDecoration: "none",
+            padding: isMobile ? "12px 22px" : "13px 32px", fontSize: 15, fontWeight: 700, textDecoration: "none",
             fontFamily: "'Inter', sans-serif",
           }}>
             ✉️ Email Me
@@ -501,7 +533,7 @@ function ContactSection() {
             display: "inline-flex", alignItems: "center", gap: 8,
             background: "transparent", color: "#94a3b8",
             border: "1.5px solid rgba(255,255,255,0.12)", borderRadius: 8,
-            padding: "13px 32px", fontSize: 15, fontWeight: 600, textDecoration: "none",
+            padding: isMobile ? "12px 22px" : "13px 32px", fontSize: 15, fontWeight: 600, textDecoration: "none",
             fontFamily: "'Inter', sans-serif",
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
@@ -558,6 +590,7 @@ function SectionLabel({ label, centered }) {
 
 export default function Portfolio() {
   const [activeNav, setActiveNav] = useState("About");
+  const { isMobile, isTablet } = useViewport();
 
   const scrollTo = (section) => {
     setActiveNav(section);
@@ -575,12 +608,12 @@ export default function Portfolio() {
 
   return (
     <div style={{ background: "#080c18", minHeight: "100vh", color: "#f1f5f9" }}>
-      <NavBar active={activeNav} onNav={scrollTo} />
-      <HeroSection onNav={scrollTo} />
-      <AboutSection />
-      <ProjectsSection />
-      <SkillsSection />
-      <ContactSection />
+      <NavBar active={activeNav} onNav={scrollTo} isMobile={isMobile} />
+      <HeroSection onNav={scrollTo} isMobile={isMobile} isTablet={isTablet} />
+      <AboutSection isMobile={isMobile} />
+      <ProjectsSection isMobile={isMobile} />
+      <SkillsSection isMobile={isMobile} />
+      <ContactSection isMobile={isMobile} />
       <Footer />
     </div>
   );
