@@ -70,7 +70,8 @@ const PROJECTS = [
     github: null,
     color: "#22d3ee",
     icon: "🌐",
-    screenshot: "https://placehold.co/600x340/0f172a/22d3ee?text=NDA",
+    screenshot: "/assist_dost/thumbnail_assist.png",
+    sampleImages: ["/assist_dost/1.jpg","/assist_dost/2.png","/assist_dost/3.png",]
   },
 ];
 
