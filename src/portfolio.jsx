@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const NAV_LINKS = ["About", "Projects", "Skills", "Contact"];
+const NAV_LINKS = ["About", "Projects", "Skills", "Contact", "Resume"];
 
 const PROJECTS = [
   {
@@ -101,7 +101,7 @@ function useViewport() {
   };
 }
 
-function NavBar({ active, onNav, isMobile }) {
+function NavBar({ active, onNav, onResume, isMobile }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -137,7 +137,7 @@ function NavBar({ active, onNav, isMobile }) {
           scrollbarWidth: "thin",
         }}>
           {NAV_LINKS.map(link => (
-            <button key={link} onClick={() => onNav(link)} style={{
+            <button key={link} onClick={() => link === "Resume" ? onResume() : onNav(link)} style={{
               background: "none", border: "none", cursor: "pointer",
               fontFamily: "'Inter', sans-serif", fontSize: isMobile ? 13 : 14, fontWeight: 500,
               color: active === link ? "#22d3ee" : "#94a3b8",
@@ -589,7 +589,7 @@ function SectionLabel({ label, centered }) {
   );
 }
 
-export default function Portfolio() {
+export default function Portfolio({ onOpenResume }) {
   const [activeNav, setActiveNav] = useState("About");
   const { isMobile, isTablet } = useViewport();
 
@@ -609,7 +609,7 @@ export default function Portfolio() {
 
   return (
     <div style={{ background: "#080c18", minHeight: "100vh", color: "#f1f5f9" }}>
-      <NavBar active={activeNav} onNav={scrollTo} isMobile={isMobile} />
+      <NavBar active={activeNav} onNav={scrollTo} onResume={onOpenResume} isMobile={isMobile} />
       <HeroSection onNav={scrollTo} isMobile={isMobile} isTablet={isTablet} />
       <AboutSection isMobile={isMobile} />
       <ProjectsSection isMobile={isMobile} />
